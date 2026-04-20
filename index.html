@@ -60,35 +60,41 @@ h1{font-size:22px;font-weight:800}
   <button class="add-btn" onclick="addItem()">+</button>
 </div>
 <script>
-var data={"chad":[{"text":"make date app","done":false,"id":1776723688901},{"text":"add list #1","done":false,"id":1776727450503}],"joelle":[{"text":"Task for Joelle","done":false,"id":1776727458731}]};var cur='chad';
-function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
-function save(){localStorage.setItem('ourlist',JSON.stringify(data))}
+var BAKED={"chad":[{"text":"make date app","done":false,"id":1776723688901},{"text":"add list #1","done":false,"id":1776727450503},{"text":"drive home","done":false,"id":1776728084725}],"joelle":[{"text":"Task for Joelle","done":false,"id":1776727458731}]};
+var LSKEY='ourlist_'+Object.keys(BAKED.chad).length+'_'+Object.keys(BAKED.joelle).length+'_'+(BAKED.chad.length+BAKED.joelle.length);
+var data=JSON.parse(JSON.stringify(BAKED));
+try{var _s=localStorage.getItem(LSKEY);if(_s){var _d=JSON.parse(_s);if(_d.chad&&_d.joelle)data=_d;}}catch(e){}
+var cur='chad';
+function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function save(){try{localStorage.setItem(LSKEY,JSON.stringify(data));}catch(e){}}
 function render(){
-  var stored=localStorage.getItem('ourlist');
-  if(stored){try{data=JSON.parse(stored)}catch(e){}}
   var all=data.chad.concat(data.joelle);
-  var done=all.filter(function(i){return i.done}).length;
-  document.getElementById('prog').textContent=done+'/'+all.length+' done';
-  document.getElementById('pbar').style.width=all.length?((done/all.length)*100)+'%':'0%';
+  var done=all.filter(function(i){return i.done;}).length;
+  var prog=document.getElementById('prog');var pbar=document.getElementById('pbar');
+  if(prog)prog.textContent=done+'/'+all.length+' done';
+  if(pbar)pbar.style.width=all.length?((done/all.length)*100)+'%':'0%';
   var c=document.getElementById('list');c.innerHTML='';
   var people=cur==='all'?['chad','joelle']:[cur];
   var names={chad:'👦 Chad',joelle:'👩 Joelle'};
   people.forEach(function(p){
-    if(cur==='all'){var l=document.createElement('div');l.className='section-label';l.textContent=names[p];c.appendChild(l)}
-    if(!data[p].length&&cur!=='all'){c.innerHTML='<div class="empty">📝<br/>No items yet — add one below!</div>';return}
+    if(cur==='all'){var lbl=document.createElement('div');lbl.className='section-label';lbl.textContent=names[p];c.appendChild(lbl);}
+    if(!data[p].length){
+      if(cur!=='all'){var e=document.createElement('div');e.className='empty';e.innerHTML='<div style="font-size:32px;margin-bottom:8px">📝</div><p>No items yet!<br/>Add one below.</p>';c.appendChild(e);}
+      return;
+    }
     data[p].forEach(function(item){
       var d=document.createElement('div');d.className='item'+(item.done?' done':'');
-      d.innerHTML='<div class="check '+(item.done?'checked':'')+'" onclick="tog(\''+p+'\','+item.id+')">'+(item.done?'<span class="check-mark">✓</span>':'')+'</div><span class="item-text'+(item.done?' done':'')+'">'+esc(item.text)+'</span><button class="del" onclick="del(\''+p+'\','+item.id+')">×</button>';
+      d.innerHTML='<div class="check '+(item.done?'checked':'')+'" onclick="tog(''+p+'','+item.id+')">'+(item.done?'<span class="check-mark">✓</span>':'')+'</div><span class="item-text'+(item.done?' done':'')+'">'+esc(item.text)+'</span><button class="del" onclick="delItem(''+p+'','+item.id+')">×</button>';
       c.appendChild(d);
     });
   });
 }
 function sw(t){
   cur=t;
-  ['chad','joelle','all'].forEach(function(x){document.getElementById('t'+x.charAt(0).toUpperCase()+x.slice(1)).classList.toggle('active',x===t)});
+  ['chad','joelle','all'].forEach(function(x){var el=document.getElementById('t'+x.charAt(0).toUpperCase()+x.slice(1));if(el)el.classList.toggle('active',x===t);});
   var inp=document.getElementById('inp');
-  inp.disabled=t==='all';inp.style.opacity=t==='all'?'0.5':'1';
-  inp.placeholder=t==='all'?'Switch to a person tab to add':'Add an item for '+(t==='chad'?'Chad':'Joelle')+'...';
+  if(t==='all'){inp.disabled=true;inp.style.opacity='0.5';inp.placeholder='Switch to a person tab to add items';}
+  else{inp.disabled=false;inp.style.opacity='1';inp.placeholder='Add an item for '+(t==='chad'?'Chad':'Joelle')+'...';}
   render();
 }
 function addItem(){
@@ -97,8 +103,8 @@ function addItem(){
   data[cur].push({text:v,done:false,id:Date.now()});
   save();document.getElementById('inp').value='';render();
 }
-function tog(p,id){var i=data[p].find(function(x){return x.id===id});if(i){i.done=!i.done;save();render()}}
-function del(p,id){data[p]=data[p].filter(function(x){return x.id!==id});save();render()}
-document.getElementById('inp').addEventListener('keydown',function(e){if(e.key==='Enter')addItem()});
-if(/^((?!chrome|android).)*safari/i.test(navigator.userAgent)&&!navigator.standalone){document.getElementById('hint').style.display='block'}
+function tog(p,id){var item=data[p].find(function(x){return x.id===id;});if(item){item.done=!item.done;save();render();}}
+function delItem(p,id){data[p]=data[p].filter(function(x){return x.id!==id;});save();render();}
+document.getElementById('inp').addEventListener('keydown',function(e){if(e.key==='Enter')addItem();});
+if(/^((?!chrome|android).)*safari/i.test(navigator.userAgent)&&!navigator.standalone){document.getElementById('hint').style.display='block';}
 render();
