@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Our List">
+  <title>Our List</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="header">
+  <div class="header-top">
+    <div>
+      <h1>Our List</h1>
+      <p class="date" id="dateLabel"></p>
+    </div>
+    <div class="progress-wrap">
+      <p class="progress-label" id="progressLabel"></p>
+      <div class="progress-bar-wrap">
+        <div class="progress-bar-fill" id="progressBar"></div>
+      </div>
+    </div>
+  </div>
+  <div class="tabs" role="tablist">
+    <button class="tab active" id="tabChad"   onclick="switchTab('chad')"   role="tab">Chad</button>
+    <button class="tab"        id="tabJoelle" onclick="switchTab('joelle')" role="tab">Joelle</button>
+    <button class="tab"        id="tabAll"    onclick="switchTab('all')"    role="tab">All</button>
+  </div>
+</div>
+
+<div id="hintBox" class="home-screen-hint" style="display:none">
+  <p>📱 Add to your home screen</p>
+  <span>Tap Share in Safari → "Add to Home Screen" for quick access.</span>
+</div>
+
+<div class="section" id="listContainer"></div>
+
+<div class="add-section">
+  <input class="add-input" id="addInput" placeholder="Add something for Chad…" autocomplete="off">
+  <button class="add-btn" id="addBtn" aria-label="Add item">+</button>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>

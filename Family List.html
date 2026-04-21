@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Our List 💚">
+  <title>Our List 💚</title>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { -webkit-text-size-adjust: 100%; }
+    body { font-family: 'Outfit', sans-serif; background: #FAF7F2; color: #1C1C1E; min-height: 100vh; padding-bottom: 40px; }
+    
+    .header { background: #fff; border-bottom: 1px solid #E8E3DB; padding: 20px 20px 0; position: sticky; top: 0; z-index: 10; }
+    .header-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+    .header h1 { font-size: 22px; font-weight: 800; }
+    .header .date { font-size: 12px; color: #6B6B70; }
+    .tabs { display: flex; gap: 0; }
+    .tab { flex: 1; padding: 12px 0; text-align: center; font-size: 14px; font-weight: 700; border: none; background: none; cursor: pointer; color: #6B6B70; border-bottom: 3px solid transparent; transition: all .15s; }
+    .tab.active { color: #1C1C1E; border-bottom-color: #1C1C1E; }
+
+    .section { padding: 20px 20px 0; }
+    .section-label { font-size: 11px; font-weight: 800; letter-spacing: 1.2px; text-transform: uppercase; color: #6B6B70; margin-bottom: 12px; }
+
+    .item { display: flex; align-items: flex-start; gap: 12px; padding: 14px 16px; background: #fff; border-radius: 14px; border: 1px solid #E8E3DB; margin-bottom: 8px; }
+    .item.done { background: #EDF7F2; border-color: #A8D5C2; }
+    .check { width: 24px; height: 24px; border-radius: 8px; border: 2px solid #E8E3DB; background: transparent; flex-shrink: 0; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all .15s; -webkit-tap-highlight-color: transparent; }
+    .check.checked { background: #2A8B68; border-color: #2A8B68; }
+    .check-mark { color: #fff; font-size: 13px; font-weight: 800; }
+    .item-text { font-size: 15px; line-height: 1.4; flex: 1; padding-top: 2px; transition: all .15s; }
+    .item-text.done { color: #6B6B70; text-decoration: line-through; }
+    .delete-btn { background: none; border: none; color: #D4CFC8; font-size: 20px; cursor: pointer; padding: 0 2px; line-height: 1; flex-shrink: 0; -webkit-tap-highlight-color: transparent; }
+
+    .add-section { position: fixed; bottom: 0; left: 0; right: 0; background: #fff; border-top: 1px solid #E8E3DB; padding: 12px 20px; padding-bottom: max(12px, env(safe-area-inset-bottom)); display: flex; gap: 10px; }
+    .add-input { flex: 1; border: 1px solid #E8E3DB; border-radius: 12px; padding: 12px 14px; font-size: 15px; font-family: 'Outfit', sans-serif; outline: none; background: #FAF7F2; }
+    .add-input:focus { border-color: #2A8B68; }
+    .add-btn { background: #2A8B68; color: #fff; border: none; border-radius: 12px; padding: 12px 18px; font-size: 18px; font-weight: 700; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+
+    .empty { text-align: center; padding: 40px 20px; color: #6B6B70; font-size: 15px; }
+    .empty-icon { font-size: 36px; margin-bottom: 10px; }
+
+    .progress-bar-wrap { background: #E8E3DB; border-radius: 4px; height: 4px; margin-top: 6px; overflow: hidden; }
+    .progress-bar-fill { height: 100%; background: #2A8B68; border-radius: 4px; transition: width .4s ease; }
+
+    .home-screen-hint { margin: 16px 20px 0; background: #EDF7F2; border: 1px solid #A8D5C2; border-radius: 14px; padding: 14px 16px; }
+    .home-screen-hint p { font-size: 13px; color: #2A8B68; font-weight: 600; margin-bottom: 4px; }
+    .home-screen-hint span { font-size: 12px; color: #6B6B70; line-height: 1.5; display: block; }
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-top">
+    <div>
+      <h1>💚 Our List</h1>
+      <p class="date" id="dateLabel"></p>
+    </div>
+    <div style="text-align:right">
+      <p id="progressLabel" style="font-size:13px;font-weight:700;color:#2A8B68"></p>
+      <div class="progress-bar-wrap" style="width:80px;margin-top:4px;margin-left:auto">
+        <div class="progress-bar-fill" id="progressBar" style="width:0%"></div>
+      </div>
+    </div>
+  </div>
+  <div class="tabs">
+    <button class="tab active" id="tabChad" onclick="switchTab('chad')">👦 Chad</button>
+    <button class="tab" id="tabJoelle" onclick="switchTab('joelle')">👩 Joelle</button>
+    <button class="tab" id="tabAll" onclick="switchTab('all')">📋 All</button>
+  </div>
+</div>
+
+<div id="hintBox" class="home-screen-hint" style="display:none">
+  <p>📱 Add to your home screen</p>
+  <span>Tap the Share button in Safari → "Add to Home Screen" → you'll have a bookmark that works like an app icon, always up to date.</span>
+</div>
+
+<div class="section" id="listContainer" style="margin-bottom:80px"></div>
+
+<div class="add-section">
+  <input class="add-input" id="addInput" placeholder="Add a takeaway or to-do..." />
+  <button class="add-btn" onclick="addItem()">+</button>
+</div>
+
+<script>
+  let data = { chad: [], joelle: [] };
+  let currentTab = 'chad';
+  const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+
+  // Load from URL hash first, then localStorage
+  function loadData() {
+    const hash = window.location.hash.slice(1);
+    if (hash) {
+      try {
+        const decoded = JSON.parse(decodeURIComponent(escape(atob(hash))));
+        data = decoded;
+        localStorage.setItem('familylist_data', JSON.stringify(data));
+        return;
+      } catch(e) {}
+    }
+    const stored = localStorage.getItem('familylist_data');
+    if (stored) {
+      try { data = JSON.parse(stored); } catch(e) {}
+    }
+  }
+
+  function saveData() {
+    localStorage.setItem('familylist_data', JSON.stringify(data));
+    // Update URL hash
+    const encoded = btoa(unescape(encodeURIComponent(JSON.stringify(data))));
+    history.replaceState(null, '', '#' + encoded);
+  }
+
+  function renderList() {
+    const container = document.getElementById('listContainer');
+    container.innerHTML = '';
+
+    const people = currentTab === 'all' ? ['chad', 'joelle'] : [currentTab];
+    const names = { chad: '👦 Chad', joelle: '👩 Joelle' };
+
+    let totalDone = 0, total = 0;
+    data.chad.forEach(i => { total++; if(i.done) totalDone++; });
+    data.joelle.forEach(i => { total++; if(i.done) totalDone++; });
+
+    document.getElementById('progressLabel').textContent = `${totalDone}/${total} done`;
+    document.getElementById('progressBar').style.width = total > 0 ? `${(totalDone/total)*100}%` : '0%';
+
+    people.forEach(person => {
+      const items = data[person];
+      if (currentTab === 'all') {
+        const label = document.createElement('div');
+        label.className = 'section-label';
+        label.style.marginTop = '16px';
+        label.textContent = names[person];
+        container.appendChild(label);
+      }
+
+      if (items.length === 0 && currentTab !== 'all') {
+        const empty = document.createElement('div');
+        empty.className = 'empty';
+        empty.innerHTML = `<div class="empty-icon">📝</div><p>No items yet.<br/>Add one below!</p>`;
+        container.appendChild(empty);
+        return;
+      }
+
+      items.forEach(item => {
+        const el = document.createElement('div');
+        el.className = `item${item.done ? ' done' : ''}`;
+        el.innerHTML = `
+          <div class="check ${item.done ? 'checked' : ''}" onclick="toggleItem('${person}', ${item.id})">
+            ${item.done ? '<span class="check-mark">✓</span>' : ''}
+          </div>
+          <span class="item-text ${item.done ? 'done' : ''}">${escapeHtml(item.text)}</span>
+          <button class="delete-btn" onclick="deleteItem('${person}', ${item.id})">×</button>
+        `;
+        container.appendChild(el);
+      });
+    });
+  }
+
+  function escapeHtml(str) {
+    return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  function switchTab(tab) {
+    currentTab = tab;
+    ['chad','joelle','all'].forEach(t => {
+      document.getElementById('tab' + t.charAt(0).toUpperCase() + t.slice(1)).classList.toggle('active', t === tab);
+    });
+    const input = document.getElementById('addInput');
+    if (tab === 'all') {
+      input.placeholder = 'Switch to a person tab to add items';
+      input.disabled = true;
+      input.style.opacity = '0.5';
+    } else {
+      input.placeholder = `Add a to-do for ${tab === 'chad' ? 'Chad' : 'Joelle'}...`;
+      input.disabled = false;
+      input.style.opacity = '1';
+    }
+    renderList();
+  }
+
+  function addItem() {
+    if (currentTab === 'all') return;
+    const input = document.getElementById('addInput');
+    const text = input.value.trim();
+    if (!text) return;
+    data[currentTab].push({ text, done: false, id: Date.now() });
+    saveData();
+    input.value = '';
+    renderList();
+  }
+
+  function toggleItem(person, id) {
+    const item = data[person].find(i => i.id === id);
+    if (item) { item.done = !item.done; saveData(); renderList(); }
+  }
+
+  function deleteItem(person, id) {
+    data[person] = data[person].filter(i => i.id !== id);
+    saveData();
+    renderList();
+  }
+
+  // Init
+  loadData();
+  document.getElementById('dateLabel').textContent = new Date().toLocaleDateString('en-US', { month:'long', day:'numeric', year:'numeric' });
+  document.getElementById('addInput').addEventListener('keydown', e => { if (e.key === 'Enter') addItem(); });
+
+  // Show home screen hint in Safari
+  if (isSafari && !navigator.standalone) {
+    document.getElementById('hintBox').style.display = 'block';
+  }
+
+  renderList();
+</script>
+</body>
+</html>
